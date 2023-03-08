@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bubble Crusher</title>
+    <style type="text/css">
+        #score{
+            width: 300px;
+            height: 60px;
+            margin: auto;
+            background-color: #9fcdff;
+            position: relative;
+        }
+
+        #viewport {
+            width: 300px;
+            height: 500px;
+            background-color: #7abaff;
+            margin: auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bubble {
+            position: absolute;
+            cursor: pointer;
+
+            overflow: hidden;
+        }
+
+        .bubble-large {
+            width: 70px;
+            height: 70px;
+            background-color: rgba(255,0,0,.5);
+            border-radius: 35px;
+        }
+
+        .bubble-middle {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0,255,0,.5);
+            border-radius: 25px;
+        }
+
+        .bubble-small {
+            width: 30px;
+            height: 30px;
+            background-color: rgba(0,0,255,.5);
+            border-radius: 15px;
+        }
+    </style>
+    <script type="application/javascript">
+
+        // --------------------------------------- FUNCTIONS ------------------------------------
+        window.addEventListener('beforeunload', (event) => {
+            event.preventDefault();
+            event.returnValue = '!!!';
+        });
+
+        const myBubbleSizes = ["bubble-large","bubble-middle","bubble-small"];
+        let score = 0;
+
+        function createBubble(size) {
+            const viewport = document.getElementById("viewport");
+            const bubble = document.createElement("div");
+
+            bubble.classList.add("bubble", size);//@TODO : Random
+            bubble.style.bottom = "0px";
+            bubble.style.left = Math.round(Math.random() * 265.0) + "px";
+
+            bubble.addEventListener("mousedown", () => {
+
+                bubble.remove();
+                //SCORE
+                if(bubble.classList.contains("bubble-small")){
+                score += 15;
+                }if(bubble.classList.contains("bubble-middle")){
+                    score += 10;
+                }
+                if(bubble.classList.contains("bubble-large")) {
+                    score += 5;
+                }
+
+                document.querySelector("#points b").innerText = score;
+            });
+
+            viewport.appendChild(bubble);
+        }
+
+
+        // ---------------------------------- INIT() -----------------------------
+        function init() {
+
+            window.requestAnimationFrame(update);
+
+        }
+
+        // -------------------------------- UPDATE () ---------------------------------
+        let bubbleCountdown = 0;
+        let lastTimeStamp = 0.0;
+
+        function update(timestamp){
+
+            const delta = timestamp - lastTimeStamp;
+            lastTimeStamp = timestamp;
+
+            let fps;
+            fps = Math.round(1000.0 / delta);
+            document.getElementById("fps").innerText = fps;
+
+            const myBubble = myBubbleSizes[Math.round(Math.random()*2)];
+            if(bubbleCountdown <= 0){
+                createBubble(myBubble);
+                bubbleCountdown = Math.floor(Math.random() * (1500 - 1000) + 500);
+            }else{
+                bubbleCountdown -= delta;
+            }
+            //setTimeout(update,100);
+            const  bubbles = document.querySelectorAll(".bubble");
+
+            bubbles.forEach((bubble) => {
+
+                let speed = 1;
+                if (bubble.classList.contains("bubble-large")){
+                     speed += 0.09 * delta;
+                }
+                if (bubble.classList.contains("bubble-middle")){
+                     speed += 0.1 * delta;
+                }
+                if (bubble.classList.contains("bubble-small")){
+                    speed += 0.2* delta;
+                }
+                let bottom = parseFloat(bubble.style.bottom);
+
+                bottom += speed;
+                bubble.style.bottom = bottom + "px";
+
+                const verticalBound = document.getElementById("viewport").clientHeight;
+
+
+                if (bottom >= verticalBound ) {
+                    document.querySelector("#lives b").innerText -= 1;
+                    bubble.remove();
+                }
+
+
+            });
+            window.requestAnimationFrame(update);
+        }
+
+        document.addEventListener("DOMContentLoaded", init);
+    </script>
+</head>
+<body>
+<div id="score" style="font-family: Bahnschrift;">
+    <div id="points">POINTS :<b> 0</b> </div>
+    <hr>
+    <div id="lives" >LIVES :<b> 0</b></div>
+</div>
+
+<div id="viewport"> <!-- MY SPIELFElD = viewport -->
+
+
+</div>
+<div id="fps"></div>
+</body>
+</html>
